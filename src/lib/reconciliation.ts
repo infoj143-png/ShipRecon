@@ -7,23 +7,20 @@ import {
 } from '@/types/reconciliation';
 
 export const SAMPLE_PURCHASE_ORDER: PurchaseOrderRow[] = [
-  { sku: 'SKU-1001', orderedQuantity: 500, unitPrice: 12.5, supplier: 'Apex Industrial Parts', poNumber: 'PO-2025-0891' },
-  { sku: 'SKU-1002', orderedQuantity: 250, unitPrice: 45.0, supplier: 'Apex Industrial Parts', poNumber: 'PO-2025-0891' },
-  { sku: 'SKU-1003', orderedQuantity: 120, unitPrice: 8.75, supplier: 'Apex Industrial Parts', poNumber: 'PO-2025-0891' },
-  { sku: 'SKU-1004', orderedQuantity: 80, unitPrice: 110.0, supplier: 'Apex Industrial Parts', poNumber: 'PO-2025-0891' },
-  { sku: 'SKU-1005', orderedQuantity: 300, unitPrice: 15.2, supplier: 'Apex Industrial Parts', poNumber: 'PO-2025-0891' },
-  { sku: 'SKU-1006', orderedQuantity: 150, unitPrice: 22.0, supplier: 'Apex Industrial Parts', poNumber: 'PO-2025-0891' },
-  { sku: 'SKU-1007', orderedQuantity: 400, unitPrice: 6.5, supplier: 'Apex Industrial Parts', poNumber: 'PO-2025-0891' },
+  { sku: 'SKU-001', orderedQuantity: 100, unitPrice: 15.0, supplier: 'Apex Industrial Supply', poNumber: 'PO-2025-0891' },
+  { sku: 'SKU-002', orderedQuantity: 50, unitPrice: 10.0, supplier: 'Apex Industrial Supply', poNumber: 'PO-2025-0891' },
+  { sku: 'SKU-003', orderedQuantity: 40, unitPrice: 25.0, supplier: 'Apex Industrial Supply', poNumber: 'PO-2025-0891' },
+  { sku: 'SKU-004', orderedQuantity: 30, unitPrice: 8.0, supplier: 'Apex Industrial Supply', poNumber: 'PO-2025-0891' },
+  { sku: 'SKU-005', orderedQuantity: 20, unitPrice: 50.0, supplier: 'Apex Industrial Supply', poNumber: 'PO-2025-0891' },
 ];
 
 export const SAMPLE_RECEIVING: ReceivingRow[] = [
-  { sku: 'SKU-1001', receivedQuantity: 500, unitPrice: 12.5, supplier: 'Apex Logistics Recv', poNumber: 'PO-2025-0891' },
-  { sku: 'SKU-1002', receivedQuantity: 200, unitPrice: 45.0, supplier: 'Apex Logistics Recv', poNumber: 'PO-2025-0891' }, // Short 50
-  { sku: 'SKU-1003', receivedQuantity: 120, unitPrice: 8.75, supplier: 'Apex Logistics Recv', poNumber: 'PO-2025-0891' }, // Matched
-  // SKU-1004 omitted => Missing
-  { sku: 'SKU-1005', receivedQuantity: 350, unitPrice: 15.2, supplier: 'Apex Logistics Recv', poNumber: 'PO-2025-0891' }, // Over 50
-  { sku: 'SKU-1006', receivedQuantity: 130, unitPrice: 22.0, supplier: 'Apex Logistics Recv', poNumber: 'PO-2025-0891' }, // Short 20
-  { sku: 'SKU-9999', receivedQuantity: 40, unitPrice: 30.0, supplier: 'Apex Logistics Recv', poNumber: 'PO-2025-0891' },  // Unexpected
+  { sku: 'SKU-001', receivedQuantity: 100, unitPrice: 15.0, supplier: 'Apex Logistics Recv', poNumber: 'PO-2025-0891' }, // Matched
+  { sku: 'SKU-002', receivedQuantity: 42, unitPrice: 10.0, supplier: 'Apex Logistics Recv', poNumber: 'PO-2025-0891' },  // Short -8 ($80)
+  { sku: 'SKU-003', receivedQuantity: 50, unitPrice: 25.0, supplier: 'Apex Logistics Recv', poNumber: 'PO-2025-0891' },  // Over +10
+  // SKU-004 omitted => Missing -30 ($240)
+  { sku: 'SKU-005', receivedQuantity: 20, unitPrice: 50.0, supplier: 'Apex Logistics Recv', poNumber: 'PO-2025-0891' },  // Matched
+  { sku: 'SKU-006', receivedQuantity: 20, unitPrice: 12.0, supplier: 'Apex Logistics Recv', poNumber: 'PO-2025-0891' },  // Unexpected +20
 ];
 
 interface AggregatedItem {
