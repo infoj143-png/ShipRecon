@@ -43,9 +43,11 @@ export interface ColumnMappingConfig {
 
 export interface FileDataState {
   fileName: string;
+  fileSizeFormatted?: string;
   rawHeaders: string[];
   rawRows: Record<string, string>[];
   mapping: ColumnMappingConfig;
+  parseErrors?: string[];
 }
 
 export type WizardStep = 1 | 2 | 3 | 4 | 5;
@@ -57,8 +59,10 @@ export interface ReconciliationSummary {
   overCount: number;
   missingCount: number;
   unexpectedCount: number;
+  discrepanciesCount: number;
   totalOrderedQty: number;
   totalReceivedQty: number;
   totalShortageQty: number;
-  totalShortageValue: number;
+  totalShortageValue?: number | null;
+  hasUnitPrice: boolean;
 }
