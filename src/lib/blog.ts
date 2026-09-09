@@ -21,9 +21,9 @@ export const BLOG_POSTS: BlogPost[] = [
       'Learn how to identify, calculate, and document supplier short shipments by comparing ordered and received quantities.',
     excerpt:
       'A practical guide for purchasing, receiving, and warehouse teams to spot short shipments, calculate discrepancy values, and document shortages for vendor credit claims.',
-    datePublished: '2025-03-01',
-    dateModified: '2025-03-01',
-    formattedDate: 'March 1, 2025',
+    datePublished: '2026-09-09',
+    dateModified: '2026-09-09',
+    formattedDate: 'September 9, 2026',
     readTime: '6 min read',
     author: {
       name: 'ShipRecon Editorial Team',
