@@ -2,8 +2,27 @@ import type { Metadata } from 'next';
 import { CTAButton } from '@/components/CTAButton';
 
 export const metadata: Metadata = {
-  title: 'About | ShipRecon - Supplier Short-Shipment Reconciliation',
-  description: 'Learn about ShipRecon, a lightweight B2B web utility designed to quickly reconcile purchase orders and receiving logs.',
+  title: 'About ShipRecon | Supplier Reconciliation Tool',
+  description:
+    'Learn how ShipRecon helps businesses compare purchase orders with received quantities and identify supplier delivery discrepancies.',
+  alternates: {
+    canonical: '/about',
+  },
+  openGraph: {
+    title: 'About ShipRecon | Supplier Reconciliation Tool',
+    description:
+      'Learn how ShipRecon helps businesses compare purchase orders with received quantities and identify supplier delivery discrepancies.',
+    url: '/about',
+    siteName: 'ShipRecon',
+    type: 'website',
+    locale: 'en_US',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'About ShipRecon | Supplier Reconciliation Tool',
+    description:
+      'Learn how ShipRecon helps businesses compare purchase orders with received quantities and identify supplier delivery discrepancies.',
+  },
 };
 
 export default function AboutPage() {

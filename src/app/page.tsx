@@ -1,6 +1,31 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { CTAButton } from '@/components/CTAButton';
 import { StatusBadge } from '@/components/StatusBadge';
+
+export const metadata: Metadata = {
+  title: 'Supplier Short-Shipment Checker | ShipRecon',
+  description:
+    'Check purchase orders against receiving files to find supplier short shipments, missing items, overages, and delivery discrepancies. Free browser-based tool.',
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    title: 'Supplier Short-Shipment Checker | ShipRecon',
+    description:
+      'Check purchase orders against receiving files to find supplier short shipments, missing items, overages, and delivery discrepancies. Free browser-based tool.',
+    url: '/',
+    siteName: 'ShipRecon',
+    type: 'website',
+    locale: 'en_US',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Supplier Short-Shipment Checker | ShipRecon',
+    description:
+      'Check purchase orders against receiving files to find supplier short shipments, missing items, overages, and delivery discrepancies. Free browser-based tool.',
+  },
+};
 
 export default function HomePage() {
   return (
