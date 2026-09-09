@@ -9,9 +9,12 @@ export function Footer() {
             <p className="font-bold text-slate-900">ShipRecon</p>
             <p className="mt-0.5 text-slate-600">Supplier Short-Shipment Reconciliation Utility</p>
           </div>
-          <div className="flex items-center space-x-6 text-xs sm:text-sm">
+          <div className="flex items-center space-x-4 sm:space-x-6 text-xs sm:text-sm">
             <Link href="/reconcile" className="hover:text-slate-900 transition-colors">
               Reconcile
+            </Link>
+            <Link href="/blog" className="hover:text-slate-900 transition-colors">
+              Blog
             </Link>
             <Link href="/about" className="hover:text-slate-900 transition-colors">
               About
