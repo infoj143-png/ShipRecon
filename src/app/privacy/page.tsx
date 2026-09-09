@@ -2,7 +2,26 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy | ShipRecon',
-  description: 'ShipRecon processes all files client-side in your browser. Read our privacy policy.',
+  description:
+    'Learn how ShipRecon protects your data with 100% client-side file processing and zero server storage.',
+  alternates: {
+    canonical: '/privacy',
+  },
+  openGraph: {
+    title: 'Privacy Policy | ShipRecon',
+    description:
+      'Learn how ShipRecon protects your data with 100% client-side file processing and zero server storage.',
+    url: '/privacy',
+    siteName: 'ShipRecon',
+    type: 'website',
+    locale: 'en_US',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Privacy Policy | ShipRecon',
+    description:
+      'Learn how ShipRecon protects your data with 100% client-side file processing and zero server storage.',
+  },
 };
 
 export default function PrivacyPage() {
