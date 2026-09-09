@@ -167,3 +167,38 @@ test('Column Mapping Auto-Detection Keywords', () => {
   assert.strictEqual(mapRecv.quantity, 'Qty Received');
   assert.strictEqual(mapRecv.unitPrice, 'Unit_Price');
 });
+
+test('Sample PO and Receiving Dataset Reconciliation Verification', async () => {
+  const { SAMPLE_PURCHASE_ORDER, SAMPLE_RECEIVING } = await import('../reconciliation');
+  const { results, summary } = reconcileRows(SAMPLE_PURCHASE_ORDER, SAMPLE_RECEIVING);
+
+  assert.strictEqual(results.length, 6);
+
+  const sku1 = results.find((r) => r.sku === 'SKU-001');
+  assert.strictEqual(sku1?.status, 'matched');
+  assert.strictEqual(sku1?.difference, 0);
+
+  const sku2 = results.find((r) => r.sku === 'SKU-002');
+  assert.strictEqual(sku2?.status, 'short');
+  assert.strictEqual(sku2?.difference, -8);
+  assert.strictEqual(sku2?.shortageValue, 80);
+
+  const sku3 = results.find((r) => r.sku === 'SKU-003');
+  assert.strictEqual(sku3?.status, 'over');
+  assert.strictEqual(sku3?.difference, 10);
+
+  const sku4 = results.find((r) => r.sku === 'SKU-004');
+  assert.strictEqual(sku4?.status, 'missing');
+  assert.strictEqual(sku4?.difference, -30);
+  assert.strictEqual(sku4?.shortageValue, 240);
+
+  const sku5 = results.find((r) => r.sku === 'SKU-005');
+  assert.strictEqual(sku5?.status, 'matched');
+  assert.strictEqual(sku5?.difference, 0);
+
+  const sku6 = results.find((r) => r.sku === 'SKU-006');
+  assert.strictEqual(sku6?.status, 'unexpected');
+  assert.strictEqual(sku6?.difference, 20);
+
+  assert.strictEqual(summary.totalShortageValue, 320);
+});

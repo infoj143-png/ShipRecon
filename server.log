@@ -5,8 +5,8 @@
 ▲ Next.js 16.3.4 (Turbopack)
 - Local:         http://localhost:3000
 - Network:       http://192.168.0.2:3000
-✓ Ready in 572ms
-✓ Running next.config.ts took 49ms
+✓ Ready in 560ms
+✓ Running next.config.ts took 50ms
 
- HEAD / 200 in 3.3s (next.js: 3.0s, application-code: 324ms)
- GET /reconcile 200 in 2.1s (next.js: 1856ms, application-code: 279ms)
+○ Compiling /reconcile ...
+ GET /reconcile 200 in 5.0s (next.js: 4.5s, application-code: 550ms)
