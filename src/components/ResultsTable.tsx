@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { ReconciliationResult } from '@/types/reconciliation';
+import { ReconciliationResult, ReconciliationStatus } from '@/types/reconciliation';
 import { StatusBadge } from './StatusBadge';
 
 interface ResultsTableProps {
@@ -17,10 +17,7 @@ export function ResultsTable({ results }: ResultsTableProps) {
   const filteredResults = useMemo(() => {
     return results
       .filter((row) => {
-        const matchesSearch =
-          row.sku.toLowerCase().includes(search.toLowerCase()) ||
-          (row.supplier && row.supplier.toLowerCase().includes(search.toLowerCase())) ||
-          (row.poNumber && row.poNumber.toLowerCase().includes(search.toLowerCase()));
+        const matchesSearch = row.sku.toLowerCase().includes(search.toLowerCase());
 
         const matchesStatus =
           statusFilter === 'all'
@@ -62,52 +59,73 @@ export function ResultsTable({ results }: ResultsTableProps) {
     currency: 'USD',
   });
 
+  const filterButtons: { id: string; label: string }[] = [
+    { id: 'all', label: 'All' },
+    { id: 'short', label: 'Short' },
+    { id: 'over', label: 'Over' },
+    { id: 'missing', label: 'Missing' },
+    { id: 'unexpected', label: 'Unexpected' },
+    { id: 'matched', label: 'Matched' },
+  ];
+
   return (
     <div className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
-      <div className="p-4 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <input
-            type="text"
-            placeholder="Search SKU, PO, or supplier..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="text-xs sm:text-sm bg-white border border-slate-300 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-slate-900 w-full sm:w-64 text-slate-900"
-          />
+      {/* Controls Header */}
+      <div className="p-4 border-b border-slate-200 bg-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        {/* Search Input */}
+        <div className="w-full md:w-72">
+          <label htmlFor="sku-search" className="sr-only">Search by SKU</label>
+          <div className="relative">
+            <input
+              id="sku-search"
+              type="text"
+              placeholder="Search by SKU..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full text-xs sm:text-sm bg-white border border-slate-300 rounded-md pl-9 pr-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-slate-900 text-slate-900 placeholder-slate-400"
+            />
+            <span className="absolute left-3 top-2 text-slate-400 text-xs">🔍</span>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
-          <span className="text-xs font-medium text-slate-500 whitespace-nowrap">Filter Status:</span>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="text-xs bg-white border border-slate-300 rounded-md px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-slate-900 text-slate-900 font-medium"
-          >
-            <option value="all">All Items ({results.length})</option>
-            <option value="discrepancies">All Discrepancies</option>
-            <option value="short">Shortages</option>
-            <option value="missing">Missing SKUs</option>
-            <option value="over">Overages</option>
-            <option value="unexpected">Unexpected SKUs</option>
-            <option value="matched">Matched Only</option>
-          </select>
+        {/* Filter Buttons */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
+          <span className="text-xs font-semibold text-slate-500 mr-1 hidden sm:inline">Filter:</span>
+          {filterButtons.map((btn) => {
+            const count =
+              btn.id === 'all'
+                ? results.length
+                : results.filter((r) => r.status === (btn.id as ReconciliationStatus)).length;
+            const isActive = statusFilter === btn.id;
+
+            return (
+              <button
+                key={btn.id}
+                type="button"
+                onClick={() => setStatusFilter(btn.id)}
+                className={`text-xs px-2.5 py-1 rounded-md transition-colors whitespace-nowrap font-medium ${
+                  isActive
+                    ? 'bg-slate-900 text-white shadow-sm'
+                    : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+                }`}
+              >
+                {btn.label} <span className={`text-[10px] ml-0.5 ${isActive ? 'text-slate-300' : 'text-slate-500'}`}>({count})</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
+      {/* Responsive Table Wrapper */}
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-xs sm:text-sm border-collapse">
+        <table className="w-full text-left text-xs sm:text-sm border-collapse min-w-[640px]">
           <thead>
-            <tr className="bg-slate-100/70 text-slate-700 font-semibold border-b border-slate-200 text-xs tracking-wider uppercase">
+            <tr className="bg-slate-100/80 text-slate-700 font-semibold border-b border-slate-200 text-xs tracking-wider uppercase">
               <th
                 onClick={() => handleSort('sku')}
                 className="p-3 cursor-pointer hover:bg-slate-200/60 transition-colors"
               >
                 SKU {sortField === 'sku' && (sortAsc ? '↑' : '↓')}
-              </th>
-              <th
-                onClick={() => handleSort('status')}
-                className="p-3 cursor-pointer hover:bg-slate-200/60 transition-colors"
-              >
-                Status {sortField === 'status' && (sortAsc ? '↑' : '↓')}
               </th>
               <th
                 onClick={() => handleSort('orderedQuantity')}
@@ -125,13 +143,19 @@ export function ResultsTable({ results }: ResultsTableProps) {
                 onClick={() => handleSort('difference')}
                 className="p-3 text-right cursor-pointer hover:bg-slate-200/60 transition-colors"
               >
-                Diff {sortField === 'difference' && (sortAsc ? '↑' : '↓')}
+                Difference {sortField === 'difference' && (sortAsc ? '↑' : '↓')}
+              </th>
+              <th
+                onClick={() => handleSort('status')}
+                className="p-3 cursor-pointer hover:bg-slate-200/60 transition-colors"
+              >
+                Status {sortField === 'status' && (sortAsc ? '↑' : '↓')}
               </th>
               <th
                 onClick={() => handleSort('shortageValue')}
                 className="p-3 text-right cursor-pointer hover:bg-slate-200/60 transition-colors"
               >
-                Shortage Impact {sortField === 'shortageValue' && (sortAsc ? '↑' : '↓')}
+                Shortage Value {sortField === 'shortageValue' && (sortAsc ? '↑' : '↓')}
               </th>
             </tr>
           </thead>
@@ -153,9 +177,9 @@ export function ResultsTable({ results }: ResultsTableProps) {
 
                 const diffColor =
                   row.difference < 0
-                    ? 'text-amber-700 font-semibold'
+                    ? 'text-amber-700 font-bold'
                     : row.difference > 0
-                    ? 'text-blue-700'
+                    ? 'text-blue-700 font-bold'
                     : 'text-slate-400';
 
                 return (
@@ -168,14 +192,14 @@ export function ResultsTable({ results }: ResultsTableProps) {
                         </span>
                       )}
                     </td>
-                    <td className="p-3 font-sans">
-                      <StatusBadge status={row.status} />
-                    </td>
                     <td className="p-3 text-right">{row.orderedQuantity}</td>
                     <td className="p-3 text-right">{row.receivedQuantity}</td>
                     <td className={`p-3 text-right ${diffColor}`}>{diffDisplay}</td>
-                    <td className="p-3 text-right font-semibold text-slate-900">
-                      {row.shortageValue && row.shortageValue > 0
+                    <td className="p-3 font-sans">
+                      <StatusBadge status={row.status} />
+                    </td>
+                    <td className="p-3 text-right font-semibold text-slate-900 font-mono">
+                      {row.shortageValue !== undefined && row.shortageValue !== null
                         ? currencyFormatter.format(row.shortageValue)
                         : '-'}
                     </td>
@@ -186,6 +210,7 @@ export function ResultsTable({ results }: ResultsTableProps) {
           </tbody>
         </table>
       </div>
+
       <div className="p-3 bg-slate-50 border-t border-slate-200 text-xs text-slate-500 flex justify-between items-center">
         <span>
           Showing <strong className="text-slate-900">{filteredResults.length}</strong> of{' '}

@@ -1,15 +1,18 @@
 'use client';
 
-import { useState, ChangeEvent } from 'react';
+import { useState, ChangeEvent, DragEvent } from 'react';
+import { FileDataState } from '@/types/reconciliation';
+import { parseUploadedFile } from '@/lib/fileParser';
 
 interface FileUploadProps {
   title: string;
   description: string;
-  fileState: { fileName: string; rawHeaders: string[]; rawRows: Record<string, string>[] } | null;
-  onFileLoaded: (data: { fileName: string; rawHeaders: string[]; rawRows: Record<string, string>[] }) => void;
+  fileState: FileDataState | null;
+  onFileLoaded: (data: FileDataState) => void;
   onLoadSample: () => void;
   onClear: () => void;
   fileTypeLabel?: string;
+  documentType: 'po' | 'receiving';
 }
 
 export function FileUpload({
@@ -19,98 +22,97 @@ export function FileUpload({
   onFileLoaded,
   onLoadSample,
   onClear,
-  fileTypeLabel = 'CSV File',
+  fileTypeLabel = 'CSV, XLSX',
+  documentType,
 }: FileUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
 
-  const parseCSVText = (text: string, fileName: string) => {
-    const lines = text.split(/\r\n|\n/).map((line) => line.trim()).filter((line) => line.length > 0);
-    if (lines.length === 0) return;
+  const processFile = async (file: File) => {
+    const validExtensions = ['.csv', '.xlsx', '.xls'];
+    const fileNameLower = file.name.toLowerCase();
+    const isValid = validExtensions.some((ext) => fileNameLower.endsWith(ext));
 
-    const parseLine = (line: string) => {
-      const result = [];
-      let cur = '';
-      let inQuotes = false;
-      for (let i = 0; i < line.length; i++) {
-        const char = line[i];
-        if (char === '"') {
-          inQuotes = !inQuotes;
-        } else if (char === ',' && !inQuotes) {
-          result.push(cur.trim());
-          cur = '';
-        } else {
-          cur += char;
-        }
-      }
-      result.push(cur.trim());
-      return result;
-    };
+    if (!isValid) {
+      alert('Unsupported file format. Please upload a CSV, XLSX, or XLS file.');
+      return;
+    }
 
-    const headers = parseLine(lines[0]);
-    const rows: Record<string, string>[] = [];
+    const result = await parseUploadedFile(file, documentType);
 
-    for (let i = 1; i < lines.length; i++) {
-      const values = parseLine(lines[i]);
-      const row: Record<string, string> = {};
-      headers.forEach((header, index) => {
-        row[header] = values[index] ?? '';
-      });
-      rows.push(row);
+    if (result.parseError) {
+      alert(result.parseError);
+      return;
     }
 
     onFileLoaded({
-      fileName,
-      rawHeaders: headers,
-      rawRows: rows,
+      fileName: result.fileName,
+      fileSizeFormatted: result.fileSizeFormatted,
+      rawHeaders: result.rawHeaders,
+      rawRows: result.rawRows,
+      mapping: result.detectedMapping,
     });
   };
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    processFile(file);
+    e.target.value = '';
+  };
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const text = event.target?.result as string;
-      if (text) {
-        parseCSVText(text, file.name);
-      }
-    };
-    reader.readAsText(file);
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      processFile(file);
+    }
   };
 
   return (
-    <div className="bg-white border border-slate-200 rounded-lg p-6 shadow-sm">
-      <div className="flex items-center justify-between mb-4">
+    <div className="bg-white border border-slate-200 rounded-lg p-6 shadow-sm space-y-4">
+      <div className="flex items-center justify-between">
         <div>
           <h3 className="text-base font-semibold text-slate-900">{title}</h3>
           <p className="text-xs text-slate-500 mt-0.5">{description}</p>
         </div>
         <span className="text-xs font-mono bg-slate-100 text-slate-700 px-2.5 py-1 rounded border border-slate-200">
-          {fileTypeLabel}
+          Accepted: {fileTypeLabel}
         </span>
       </div>
 
       {fileState ? (
-        <div className="border border-emerald-200 bg-emerald-50/50 rounded-lg p-4 flex items-center justify-between">
+        <div className="border border-emerald-200 bg-emerald-50/50 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-md bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-sm">
-              CSV
+            <div className="w-10 h-10 rounded-md bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs uppercase font-mono">
+              {fileState.fileName.split('.').pop() || 'FILE'}
             </div>
             <div>
               <p className="text-sm font-semibold text-slate-900">{fileState.fileName}</p>
               <p className="text-xs text-slate-600">
+                {fileState.fileSizeFormatted ? `${fileState.fileSizeFormatted} • ` : ''}
                 {fileState.rawRows.length} rows detected • {fileState.rawHeaders.length} columns
               </p>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={onClear}
-            className="text-xs font-medium text-slate-600 hover:text-rose-600 border border-slate-300 bg-white hover:bg-slate-50 px-3 py-1.5 rounded transition-colors"
-          >
-            Remove File
-          </button>
+          <div className="flex items-center gap-2">
+            <label className="text-xs font-medium text-slate-700 hover:text-slate-900 border border-slate-300 bg-white hover:bg-slate-50 px-3 py-1.5 rounded cursor-pointer transition-colors">
+              Replace File
+              <input
+                type="file"
+                accept=".csv,.xlsx,.xls"
+                className="hidden"
+                onChange={handleFileChange}
+              />
+            </label>
+            <button
+              type="button"
+              onClick={onClear}
+              className="text-xs font-medium text-rose-700 hover:text-rose-800 border border-rose-200 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded transition-colors"
+            >
+              Remove
+            </button>
+          </div>
         </div>
       ) : (
         <div
@@ -119,19 +121,7 @@ export function FileUpload({
             setIsDragging(true);
           }}
           onDragLeave={() => setIsDragging(false)}
-          onDrop={(e) => {
-            e.preventDefault();
-            setIsDragging(false);
-            const file = e.dataTransfer.files?.[0];
-            if (file) {
-              const reader = new FileReader();
-              reader.onload = (ev) => {
-                const text = ev.target?.result as string;
-                if (text) parseCSVText(text, file.name);
-              };
-              reader.readAsText(file);
-            }
-          }}
+          onDrop={handleDrop}
           className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
             isDragging ? 'border-slate-900 bg-slate-50' : 'border-slate-300 hover:border-slate-400'
           }`}
@@ -145,16 +135,16 @@ export function FileUpload({
               browse
               <input
                 type="file"
-                accept=".csv,.txt"
+                accept=".csv,.xlsx,.xls"
                 className="hidden"
                 onChange={handleFileChange}
               />
             </label>
           </p>
-          <p className="text-xs text-slate-400 mt-1">Supports standard CSV files with headers</p>
+          <p className="text-xs text-slate-400 mt-1">Accepted formats: CSV, XLSX, XLS</p>
 
           <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-center gap-2">
-            <span className="text-xs text-slate-500">Don&apos;t have a file right now?</span>
+            <span className="text-xs text-slate-500">Don&apos;t have a file ready?</span>
             <button
               type="button"
               onClick={onLoadSample}
@@ -165,6 +155,11 @@ export function FileUpload({
           </div>
         </div>
       )}
+
+      <p className="text-[11px] text-slate-500 bg-slate-50 border border-slate-200 rounded px-3 py-2 flex items-center gap-1.5">
+        <span className="text-slate-700">🔒</span>
+        Your files are processed locally in your browser and are not uploaded to our servers.
+      </p>
     </div>
   );
 }
