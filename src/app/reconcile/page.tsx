@@ -17,6 +17,7 @@ import { ColumnMapping } from '@/components/ColumnMapping';
 import { SummaryCard } from '@/components/SummaryCard';
 import { ResultsTable } from '@/components/ResultsTable';
 import { ExportButton } from '@/components/ExportButton';
+import { CTAButton } from '@/components/CTAButton';
 
 export default function ReconcilePage() {
   const [currentStep, setCurrentStep] = useState<WizardStep>(1);
@@ -174,14 +175,12 @@ export default function ReconcilePage() {
           />
 
           <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
-            <button
-              type="button"
+            <CTAButton
               disabled={!isStep1Valid}
               onClick={() => setCurrentStep(2)}
-              className="bg-slate-900 text-white hover:bg-slate-800 disabled:bg-slate-300 disabled:cursor-not-allowed font-medium text-xs sm:text-sm px-5 py-2.5 rounded-md transition-colors"
             >
               Continue to Step 2: Upload Receiving Log →
-            </button>
+            </CTAButton>
           </div>
         </div>
       )}
@@ -200,21 +199,18 @@ export default function ReconcilePage() {
           />
 
           <div className="flex justify-between items-center pt-4 border-t border-slate-200">
-            <button
-              type="button"
+            <CTAButton
+              variant="secondary"
               onClick={() => setCurrentStep(1)}
-              className="text-xs sm:text-sm font-medium text-slate-700 hover:text-slate-900 border border-slate-300 bg-white px-4 py-2 rounded-md hover:bg-slate-50 transition-colors"
             >
               ← Back to PO Upload
-            </button>
-            <button
-              type="button"
+            </CTAButton>
+            <CTAButton
               disabled={!isStep2Valid}
               onClick={() => setCurrentStep(3)}
-              className="bg-slate-900 text-white hover:bg-slate-800 disabled:bg-slate-300 disabled:cursor-not-allowed font-medium text-xs sm:text-sm px-5 py-2.5 rounded-md transition-colors"
             >
               Continue to Step 3: Column Mapping →
-            </button>
+            </CTAButton>
           </div>
         </div>
       )}
@@ -246,21 +242,18 @@ export default function ReconcilePage() {
           </div>
 
           <div className="flex justify-between items-center pt-4 border-t border-slate-200">
-            <button
-              type="button"
+            <CTAButton
+              variant="secondary"
               onClick={() => setCurrentStep(2)}
-              className="text-xs sm:text-sm font-medium text-slate-700 hover:text-slate-900 border border-slate-300 bg-white px-4 py-2 rounded-md hover:bg-slate-50 transition-colors"
             >
               ← Back to Receiving Upload
-            </button>
-            <button
-              type="button"
+            </CTAButton>
+            <CTAButton
               disabled={!isStep3Valid}
               onClick={() => setCurrentStep(4)}
-              className="bg-slate-900 text-white hover:bg-slate-800 disabled:bg-slate-300 disabled:cursor-not-allowed font-medium text-xs sm:text-sm px-5 py-2.5 rounded-md transition-colors"
             >
               Continue to Step 4: Run Reconciliation →
-            </button>
+            </CTAButton>
           </div>
         </div>
       )}
@@ -288,20 +281,17 @@ export default function ReconcilePage() {
           </div>
 
           <div className="flex justify-center gap-4 pt-4">
-            <button
-              type="button"
+            <CTAButton
+              variant="secondary"
               onClick={() => setCurrentStep(3)}
-              className="text-xs sm:text-sm font-medium text-slate-700 hover:text-slate-900 border border-slate-300 bg-white px-4 py-2 rounded-md hover:bg-slate-50 transition-colors"
             >
               ← Back to Mapping
-            </button>
-            <button
-              type="button"
+            </CTAButton>
+            <CTAButton
               onClick={runReconciliationProcess}
-              className="bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs sm:text-sm px-6 py-2.5 rounded-md shadow-sm transition-colors"
             >
               Run Reconciliation Now
-            </button>
+            </CTAButton>
           </div>
         </div>
       )}
@@ -327,8 +317,8 @@ export default function ReconcilePage() {
           </div>
 
           <div className="flex justify-between items-center pt-4 border-t border-slate-200">
-            <button
-              type="button"
+            <CTAButton
+              variant="secondary"
               onClick={() => {
                 setPoFile(null);
                 setReceivingFile(null);
@@ -336,10 +326,9 @@ export default function ReconcilePage() {
                 setSummaryState(null);
                 setCurrentStep(1);
               }}
-              className="text-xs sm:text-sm font-medium text-slate-700 hover:text-slate-900 border border-slate-300 bg-white px-4 py-2 rounded-md hover:bg-slate-50 transition-colors"
             >
               Start New Reconciliation
-            </button>
+            </CTAButton>
           </div>
         </div>
       )}

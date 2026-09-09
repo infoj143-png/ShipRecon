@@ -6,10 +6,10 @@ export function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-xs sm:text-sm text-slate-500">
           <div>
-            <p className="font-medium text-slate-700">Supplier Short-Shipment Reconciliation</p>
-            <p className="mt-0.5">A focused business utility for comparing purchase orders and receiving logs.</p>
+            <p className="font-bold text-slate-900">ShipRecon</p>
+            <p className="mt-0.5 text-slate-600">Supplier Short-Shipment Reconciliation Utility</p>
           </div>
-          <div className="flex items-center space-x-6">
+          <div className="flex items-center space-x-6 text-xs sm:text-sm">
             <Link href="/reconcile" className="hover:text-slate-900 transition-colors">
               Reconcile
             </Link>
@@ -21,8 +21,9 @@ export function Footer() {
             </Link>
           </div>
         </div>
-        <div className="mt-6 pt-6 border-t border-slate-200 text-xs text-slate-400 text-center sm:text-left">
-          &copy; {new Date().getFullYear()} Short-Ship Recon. Ready for Vercel deployment.
+        <div className="mt-6 pt-6 border-t border-slate-200 text-xs text-slate-400 text-center sm:text-left flex flex-col sm:flex-row justify-between items-center gap-2">
+          <span>&copy; {new Date().getFullYear()} ShipRecon. Fast client-side reconciliation.</span>
+          <span>Zero external server dependencies</span>
         </div>
       </div>
     </footer>
