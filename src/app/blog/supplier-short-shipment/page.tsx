@@ -20,8 +20,8 @@ export const metadata: Metadata = {
     siteName: 'ShipRecon',
     type: 'article',
     locale: 'en_US',
-    publishedTime: '2025-03-01T00:00:00.000Z',
-    modifiedTime: '2025-03-01T00:00:00.000Z',
+    publishedTime: '2026-09-09T00:00:00.000Z',
+    modifiedTime: '2026-09-09T00:00:00.000Z',
   },
   twitter: {
     card: 'summary',
@@ -40,8 +40,8 @@ export default function ArticlePage() {
     headline: 'Supplier Short Shipment: How to Find, Calculate, and Document Shortages',
     description:
       'Learn how to identify, calculate, and document supplier short shipments by comparing ordered and received quantities.',
-    datePublished: '2025-03-01',
-    dateModified: '2025-03-01',
+    datePublished: '2026-09-09',
+    dateModified: '2026-09-09',
     mainEntityOfPage: {
       '@type': 'WebPage',
       '@id': `${defaultSiteUrl}/blog/supplier-short-shipment`,
@@ -130,7 +130,7 @@ export default function ArticlePage() {
             &larr; Back to Resources
           </Link>
           <div className="flex items-center gap-3 text-xs text-slate-500 mb-3">
-            <time dateTime="2025-03-01">{post?.formattedDate || 'March 1, 2025'}</time>
+            <time dateTime="2026-09-09">{post?.formattedDate || 'September 9, 2026'}</time>
             <span>&bull;</span>
             <span>{post?.readTime || '6 min read'}</span>
           </div>
