@@ -17,7 +17,10 @@ export function formatFileSize(bytes: number): string {
 }
 
 export function autoDetectColumns(headers: string[], type: 'po' | 'receiving'): ColumnMappingConfig {
-  const normHeaders = headers.map((h) => ({ original: h, clean: h.trim().toLowerCase() }));
+  const normHeaders = headers.map((h) => ({
+    original: h,
+    clean: h.trim().toLowerCase().replace(/[-_]/g, ' ').replace(/\s+/g, ' '),
+  }));
 
   const findBestHeader = (keywords: string[]): string => {
     // 1. Exact match
@@ -143,14 +146,33 @@ export async function parseUploadedFile(
       };
     }
 
-    const rawRows: Record<string, string>[] = jsonRows.map((row) => {
+    const rawRows: Record<string, string>[] = [];
+    jsonRows.forEach((row) => {
       const formattedRow: Record<string, string> = {};
+      let hasValue = false;
       rawHeaders.forEach((header) => {
         const val = row[header];
-        formattedRow[header] = val !== undefined && val !== null ? String(val).trim() : '';
+        const strVal = val !== undefined && val !== null ? String(val).trim() : '';
+        formattedRow[header] = strVal;
+        if (strVal.length > 0) {
+          hasValue = true;
+        }
       });
-      return formattedRow;
+      if (hasValue) {
+        rawRows.push(formattedRow);
+      }
     });
+
+    if (rawRows.length === 0) {
+      return {
+        fileName,
+        fileSizeFormatted,
+        rawHeaders,
+        rawRows: [],
+        detectedMapping: { sku: '', quantity: '' },
+        parseError: 'The uploaded file contains no valid data rows.',
+      };
+    }
 
     const detectedMapping = autoDetectColumns(rawHeaders, type);
 

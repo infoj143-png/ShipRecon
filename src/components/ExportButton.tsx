@@ -18,6 +18,12 @@ export function ExportButton({ results }: ExportButtonProps) {
       ? results.filter((r) => r.status !== 'matched')
       : results;
 
+    if (dataToExport.length === 0) {
+      alert('No discrepancies found. All items matched the purchase order perfectly!');
+      setIsOpen(false);
+      return;
+    }
+
     const dataRows = dataToExport.map((r) => ({
       'SKU': r.sku,
       'Status': r.status.toUpperCase(),

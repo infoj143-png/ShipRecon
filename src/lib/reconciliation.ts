@@ -138,7 +138,8 @@ export function reconcileRows(
     const supplier = po?.supplier || recv?.supplier;
     const poNumber = po?.poNumber || recv?.poNumber;
 
-    const difference = receivedQuantity - orderedQuantity;
+    const rawDiff = receivedQuantity - orderedQuantity;
+    const difference = Math.round(rawDiff * 10000) / 10000;
 
     let status: ReconciliationStatus;
     let shortageValue: number | undefined = undefined;
@@ -152,7 +153,7 @@ export function reconcileRows(
       const shortQty = orderedQuantity;
       totalShortageQty += shortQty;
       if (itemHasUnitPrice && unitPrice !== undefined) {
-        shortageValue = Math.abs(shortQty) * unitPrice;
+        shortageValue = Math.round(Math.abs(shortQty) * unitPrice * 100) / 100;
         totalShortageValue += shortageValue;
       }
     } else if (difference === 0) {
@@ -164,7 +165,7 @@ export function reconcileRows(
       const shortQty = Math.abs(difference);
       totalShortageQty += shortQty;
       if (itemHasUnitPrice && unitPrice !== undefined) {
-        shortageValue = shortQty * unitPrice;
+        shortageValue = Math.round(shortQty * unitPrice * 100) / 100;
         totalShortageValue += shortageValue;
       }
     } else {
@@ -198,10 +199,10 @@ export function reconcileRows(
     missingCount,
     unexpectedCount,
     discrepanciesCount,
-    totalOrderedQty,
-    totalReceivedQty,
-    totalShortageQty,
-    totalShortageValue: globalHasUnitPrice ? totalShortageValue : null,
+    totalOrderedQty: Math.round(totalOrderedQty * 10000) / 10000,
+    totalReceivedQty: Math.round(totalReceivedQty * 10000) / 10000,
+    totalShortageQty: Math.round(totalShortageQty * 10000) / 10000,
+    totalShortageValue: globalHasUnitPrice ? Math.round(totalShortageValue * 100) / 100 : null,
     hasUnitPrice: globalHasUnitPrice,
   };
 
