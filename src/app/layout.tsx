@@ -10,7 +10,7 @@ const inter = Inter({
   display: 'swap',
 });
 
-const defaultSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://shiprecon.com';
+const defaultSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ship-recon.vercel.app';
 
 export const metadata: Metadata = {
   metadataBase: new URL(defaultSiteUrl),

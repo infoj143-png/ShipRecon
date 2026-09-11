@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { CTAButton } from '@/components/CTAButton';
 import { getPostBySlug } from '@/lib/blog';
 
-const defaultSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://shiprecon.com';
+const defaultSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ship-recon.vercel.app';
 
 export const metadata: Metadata = {
   title: 'Supplier Short Shipment: How to Find, Calculate, and Document Shortages | ShipRecon',
