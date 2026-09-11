@@ -3,11 +3,9 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { CTAButton } from './CTAButton';
-import { HelpGuide } from './HelpGuide';
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   // Close mobile menu on Escape key
   useEffect(() => {
@@ -25,6 +23,11 @@ export function Header() {
   }, [isMenuOpen]);
 
   const closeMenu = () => setIsMenuOpen(false);
+
+  const openAssistant = () => {
+    closeMenu();
+    window.dispatchEvent(new CustomEvent('open-shiprecon-chatbot'));
+  };
 
   return (
     <header className="border-b border-slate-200 bg-white sticky top-0 z-40">
@@ -81,8 +84,8 @@ export function Header() {
 
             <button
               type="button"
-              onClick={() => setIsHelpOpen(true)}
-              aria-label="Open Help and Navigation Guide"
+              onClick={openAssistant}
+              aria-label="Open Assistant and Navigation Guide"
               className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400"
             >
               <span className="w-4 h-4 rounded-full bg-slate-800 text-white flex items-center justify-center text-[10px] font-bold">
@@ -170,10 +173,7 @@ export function Header() {
             <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
               <button
                 type="button"
-                onClick={() => {
-                  closeMenu();
-                  setIsHelpOpen(true);
-                }}
+                onClick={openAssistant}
                 className="text-slate-600 hover:text-slate-900 font-semibold underline"
               >
                 Need help navigating?
@@ -183,9 +183,6 @@ export function Header() {
           </div>
         </div>
       )}
-
-      {/* Help Guide Modal */}
-      <HelpGuide isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
     </header>
   );
 }
