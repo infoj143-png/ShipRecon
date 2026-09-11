@@ -7,13 +7,25 @@ export interface ChatHistoryItem {
   content: string;
 }
 
+const DEFAULT_USER_ERROR = "Sorry, I'm having trouble connecting right now. Please try again in a moment.";
+
+function sanitizeErrorMessage(error: unknown): string {
+  if (!error) return 'Unknown error';
+  let message = typeof error === 'string' ? error : (error as { message?: string }).message || String(error);
+  // Remove any potential secret keys or authorization headers from logged string
+  message = message.replace(/AIzaSy[A-Za-z0-9_-]{33}/g, '[REDACTED_KEY]');
+  message = message.replace(/key=[A-Za-z0-9_-]+/gi, 'key=[REDACTED]');
+  message = message.replace(/Bearer\s+[A-Za-z0-9._-]+/gi, 'Bearer [REDACTED]');
+  return message.slice(0, 500);
+}
+
 export async function POST(req: Request) {
   try {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      console.error('[ShipRecon Chatbot API Error] GEMINI_API_KEY environment variable is missing.');
+      console.error('[ShipRecon Chatbot API Error] [MISSING_API_KEY] GEMINI_API_KEY environment variable is missing.');
       return NextResponse.json(
-        { error: "Sorry, I'm having trouble connecting right now. Please try again in a moment." },
+        { error: DEFAULT_USER_ERROR },
         { status: 500 }
       );
     }
@@ -22,6 +34,7 @@ export async function POST(req: Request) {
     try {
       body = await req.json();
     } catch {
+      console.error('[ShipRecon Chatbot API Error] [INVALID_REQUEST] Failed to parse JSON body.');
       return NextResponse.json(
         { error: 'Invalid request payload. Expected valid JSON.' },
         { status: 400 }
@@ -29,6 +42,7 @@ export async function POST(req: Request) {
     }
 
     if (!body || typeof body !== 'object') {
+      console.error('[ShipRecon Chatbot API Error] [INVALID_REQUEST] Payload is not an object.');
       return NextResponse.json(
         { error: 'Invalid request payload.' },
         { status: 400 }
@@ -38,6 +52,7 @@ export async function POST(req: Request) {
     const { message, history } = body as { message?: unknown; history?: unknown };
 
     if (typeof message !== 'string' || !message.trim()) {
+      console.error('[ShipRecon Chatbot API Error] [INVALID_REQUEST] Missing or empty message field.');
       return NextResponse.json(
         { error: 'Message is required and must be a non-empty string.' },
         { status: 400 }
@@ -46,6 +61,7 @@ export async function POST(req: Request) {
 
     const trimmedMessage = message.trim();
     if (trimmedMessage.length > 500) {
+      console.error('[ShipRecon Chatbot API Error] [INVALID_REQUEST] Message exceeds 500 character limit.');
       return NextResponse.json(
         { error: 'Message exceeds maximum length of 500 characters.' },
         { status: 400 }
@@ -72,7 +88,7 @@ export async function POST(req: Request) {
       }
     }
 
-    const modelName = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+    const modelName = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
     const ai = new GoogleGenAI({ apiKey });
 
     const systemInstructionCombined = `${SYSTEM_INSTRUCTION}\n\n${SHIPRECON_KNOWLEDGE}`;
@@ -85,25 +101,78 @@ export async function POST(req: Request) {
       },
     ];
 
-    const response = await ai.models.generateContent({
-      model: modelName,
-      contents,
-      config: {
-        systemInstruction: systemInstructionCombined,
-        temperature: 0.3,
-        maxOutputTokens: 600,
-      },
-    });
+    let response;
+    try {
+      response = await ai.models.generateContent({
+        model: modelName,
+        contents,
+        config: {
+          systemInstruction: systemInstructionCombined,
+          temperature: 0.3,
+          maxOutputTokens: 600,
+        },
+      });
+    } catch (genError: unknown) {
+      const errStr = sanitizeErrorMessage(genError);
+      const status = (genError as { status?: number | string; code?: number | string }).status || (genError as { code?: number | string }).code || '';
+      const statusNum = Number(status) || 0;
 
-    const responseText = response.text || "I'm sorry, I couldn't process your request right now.";
+      let category = 'GEMINI_REQUEST_FAILED';
+      let httpStatus = 500;
+
+      if (
+        statusNum === 401 ||
+        statusNum === 403 ||
+        errStr.includes('API_KEY_INVALID') ||
+        errStr.includes('API key not valid') ||
+        errStr.includes('UNAUTHENTICATED') ||
+        errStr.includes('PERMISSION_DENIED')
+      ) {
+        category = 'INVALID_API_KEY';
+        httpStatus = 401;
+      } else if (
+        statusNum === 429 ||
+        errStr.includes('RESOURCE_EXHAUSTED') ||
+        errStr.includes('rate limit') ||
+        errStr.includes('quota')
+      ) {
+        category = 'RATE_LIMITED';
+        httpStatus = 429;
+      } else if (
+        statusNum === 404 ||
+        errStr.includes('NOT_FOUND') ||
+        errStr.includes('is not found') ||
+        errStr.includes('Model not found')
+      ) {
+        category = 'INVALID_MODEL';
+        httpStatus = 500;
+      }
+
+      console.error(`[ShipRecon Chatbot API Error] [${category}] ${errStr}`);
+      return NextResponse.json(
+        { error: DEFAULT_USER_ERROR },
+        { status: httpStatus }
+      );
+    }
+
+    const responseText = response?.text;
+
+    if (!responseText || !responseText.trim()) {
+      console.error('[ShipRecon Chatbot API Error] [EMPTY_GEMINI_RESPONSE] Gemini response contained no text output.');
+      return NextResponse.json(
+        { error: DEFAULT_USER_ERROR },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
-      text: responseText,
+      text: responseText.trim(),
     });
-  } catch (error) {
-    console.error('[ShipRecon Chatbot API Error]', error);
+  } catch (error: unknown) {
+    const errStr = sanitizeErrorMessage(error);
+    console.error(`[ShipRecon Chatbot API Error] [INTERNAL_ERROR] ${errStr}`);
     return NextResponse.json(
-      { error: "Sorry, I'm having trouble connecting right now. Please try again in a moment." },
+      { error: DEFAULT_USER_ERROR },
       { status: 500 }
     );
   }
